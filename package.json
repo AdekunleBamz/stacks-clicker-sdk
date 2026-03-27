@@ -1,0 +1,67 @@
+{
+  "name": "stacks-clicker-sdk",
+  "version": "1.0.0",
+  "description": "Type-safe SDK for building contract-call payloads for Stacks Clicker contracts.",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "clean": "rimraf dist coverage",
+    "build": "npm run clean && tsup --config tsup.config.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run lint && npm run typecheck && npm run test && npm run build"
+  },
+  "keywords": [
+    "stacks",
+    "bitcoin",
+    "clarity",
+    "sdk",
+    "web3"
+  ],
+  "author": "AdekunleBamz",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AdekunleBamz/stacks-clicker-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AdekunleBamz/stacks-clicker-sdk/issues"
+  },
+  "homepage": "https://github.com/AdekunleBamz/stacks-clicker-sdk#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.23.0",
+    "@vitest/coverage-v8": "^3.1.1",
+    "eslint": "^9.23.0",
+    "prettier": "^3.5.3",
+    "rimraf": "^5.0.10",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.27.0",
+    "vitest": "^3.1.1"
+  }
+}
