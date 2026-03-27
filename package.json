@@ -53,6 +53,10 @@
   "publishConfig": {
     "access": "public"
   },
+  "dependencies": {
+    "@stacks/network": "^7.3.1",
+    "@stacks/transactions": "^7.3.1"
+  },
   "devDependencies": {
     "@eslint/js": "^9.23.0",
     "@vitest/coverage-v8": "^3.1.1",

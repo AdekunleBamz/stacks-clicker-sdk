@@ -1,3 +1,5 @@
+import { STACKS_TESTNET } from '@stacks/network';
+import { uintCV } from '@stacks/transactions';
 import { describe, expect, it } from 'vitest';
 
 import { DEFAULT_DEPLOYER, StacksClickerSDK } from '../src/index.js';
@@ -30,6 +32,21 @@ describe('StacksClickerSDK', () => {
     expect(payload.contractName).toBe('clicker-v99');
     expect(payload.network).toBe('testnet');
     expect(payload.functionArgs).toEqual([{ type: 'uint128', value: '12' }]);
+  });
+
+  it('builds stacks contract-call options with typed Clarity values', () => {
+    const sdk = new StacksClickerSDK({
+      network: 'testnet',
+    });
+
+    const payload = sdk.voteCall(1, 2);
+
+    expect(payload.contractAddress).toBe(DEFAULT_DEPLOYER);
+    expect(payload.contractName).toBe('quickpoll-v2p');
+    expect(payload.functionName).toBe('vote');
+    expect(payload.functionArgs).toEqual([uintCV(1n), uintCV(2n)]);
+    expect(payload.network).toBe(STACKS_TESTNET);
+    expect(sdk.stacksNetwork).toBe(STACKS_TESTNET);
   });
 
   it('accepts bigint arguments and preserves precision', () => {

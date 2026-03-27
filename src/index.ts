@@ -1,3 +1,6 @@
+import { STACKS_MAINNET, STACKS_TESTNET, type StacksNetwork } from '@stacks/network';
+import { uintCV, type ClarityValue } from '@stacks/transactions';
+
 import {
   DEFAULT_CONTRACTS,
   DEFAULT_DEPLOYER,
@@ -15,12 +18,25 @@ interface ClarityUintArg {
   value: string;
 }
 
+interface UintInput {
+  label: string;
+  value: UintLike;
+}
+
 export interface ContractPayload {
   contractAddress: string;
   contractName: string;
   functionName: string;
   functionArgs: ClarityUintArg[];
   network: NetworkType;
+}
+
+export interface ContractCallPayload {
+  contractAddress: string;
+  contractName: string;
+  functionName: string;
+  functionArgs: ClarityValue[];
+  network: StacksNetwork;
 }
 
 export interface SDKOptions {
@@ -32,10 +48,12 @@ export interface SDKOptions {
 export class StacksClickerSDK {
   public readonly deployer: string;
   public readonly network: NetworkType;
+  public readonly stacksNetwork: StacksNetwork;
   public readonly contracts: ContractNames;
 
   constructor(options: SDKOptions = {}) {
     this.network = resolveNetwork(options.network);
+    this.stacksNetwork = resolveStacksNetwork(this.network);
     this.deployer = resolveDeployer(options.deployerAddress);
     this.contracts = {
       ...DEFAULT_CONTRACTS[this.network],
@@ -44,47 +62,105 @@ export class StacksClickerSDK {
   }
 
   public click(): ContractPayload {
-    return this.buildPayload(this.contracts.clicker, 'click');
+    return this.buildRpcPayload(this.contracts.clicker, 'click');
+  }
+
+  public clickCall(): ContractCallPayload {
+    return this.buildContractCallPayload(this.contracts.clicker, 'click');
   }
 
   public multiClick(amount: UintLike): ContractPayload {
-    return this.buildPayload(this.contracts.clicker, 'multi-click', [
-      toUint128Arg(amount, 'amount'),
+    return this.buildRpcPayload(this.contracts.clicker, 'multi-click', [
+      { label: 'amount', value: amount },
+    ]);
+  }
+
+  public multiClickCall(amount: UintLike): ContractCallPayload {
+    return this.buildContractCallPayload(this.contracts.clicker, 'multi-click', [
+      { label: 'amount', value: amount },
     ]);
   }
 
   public ping(): ContractPayload {
-    return this.buildPayload(this.contracts.clicker, 'ping');
+    return this.buildRpcPayload(this.contracts.clicker, 'ping');
+  }
+
+  public pingCall(): ContractCallPayload {
+    return this.buildContractCallPayload(this.contracts.clicker, 'ping');
   }
 
   public tip(amountInUStx: UintLike): ContractPayload {
-    return this.buildPayload(this.contracts.tipJar, 'tip', [
-      toUint128Arg(amountInUStx, 'amountInUStx'),
+    return this.buildRpcPayload(this.contracts.tipJar, 'tip', [
+      {
+        label: 'amountInUStx',
+        value: amountInUStx,
+      },
+    ]);
+  }
+
+  public tipCall(amountInUStx: UintLike): ContractCallPayload {
+    return this.buildContractCallPayload(this.contracts.tipJar, 'tip', [
+      {
+        label: 'amountInUStx',
+        value: amountInUStx,
+      },
     ]);
   }
 
   public withdrawTip(): ContractPayload {
-    return this.buildPayload(this.contracts.tipJar, 'withdraw');
+    return this.buildRpcPayload(this.contracts.tipJar, 'withdraw');
+  }
+
+  public withdrawTipCall(): ContractCallPayload {
+    return this.buildContractCallPayload(this.contracts.tipJar, 'withdraw');
   }
 
   public vote(pollId: UintLike, optionId: UintLike): ContractPayload {
-    return this.buildPayload(this.contracts.quickPoll, 'vote', [
-      toUint128Arg(pollId, 'pollId'),
-      toUint128Arg(optionId, 'optionId'),
+    return this.buildRpcPayload(this.contracts.quickPoll, 'vote', [
+      { label: 'pollId', value: pollId },
+      { label: 'optionId', value: optionId },
     ]);
   }
 
-  private buildPayload(
+  public voteCall(pollId: UintLike, optionId: UintLike): ContractCallPayload {
+    return this.buildContractCallPayload(this.contracts.quickPoll, 'vote', [
+      { label: 'pollId', value: pollId },
+      { label: 'optionId', value: optionId },
+    ]);
+  }
+
+  private buildRpcPayload(
     contractName: string,
     functionName: string,
-    functionArgs: ClarityUintArg[] = [],
+    inputs: UintInput[] = [],
   ): ContractPayload {
+    const parsed = parseUintInputs(inputs);
+
     return {
       contractAddress: this.deployer,
       contractName,
       functionName,
-      functionArgs,
+      functionArgs: parsed.map((value) => ({
+        type: 'uint128',
+        value: value.toString(),
+      })),
       network: this.network,
+    };
+  }
+
+  private buildContractCallPayload(
+    contractName: string,
+    functionName: string,
+    inputs: UintInput[] = [],
+  ): ContractCallPayload {
+    const parsed = parseUintInputs(inputs);
+
+    return {
+      contractAddress: this.deployer,
+      contractName,
+      functionName,
+      functionArgs: parsed.map((value) => uintCV(value)),
+      network: this.stacksNetwork,
     };
   }
 }
@@ -96,6 +172,10 @@ function resolveNetwork(network: SDKOptions['network']): NetworkType {
   }
 
   return candidate;
+}
+
+function resolveStacksNetwork(network: NetworkType): StacksNetwork {
+  return network === 'mainnet' ? STACKS_MAINNET : STACKS_TESTNET;
 }
 
 function resolveDeployer(deployerAddress: SDKOptions['deployerAddress']): string {
@@ -127,12 +207,8 @@ function sanitizeContractOverrides(contracts: SDKOptions['contracts']): Partial<
   return validated;
 }
 
-function toUint128Arg(value: UintLike, label: string): ClarityUintArg {
-  const parsed = parseUint128(value, label);
-  return {
-    type: 'uint128',
-    value: parsed.toString(),
-  };
+function parseUintInputs(inputs: UintInput[]): bigint[] {
+  return inputs.map((input) => parseUint128(input.value, input.label));
 }
 
 function parseUint128(value: UintLike, label: string): bigint {
