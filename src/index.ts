@@ -252,3 +252,5 @@ function assertUint128Range(value: bigint, label: string): bigint {
 }
 
 export * from './constants.js';
+export * from './utils.js';
+export * from './protocol.js';

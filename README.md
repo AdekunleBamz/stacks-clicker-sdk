@@ -68,6 +68,16 @@ Methods:
 
 All numeric arguments accept `number`, `bigint`, or base-10 unsigned integer `string`, and are validated against `uint128` range.
 
+### Integrated Helpers
+
+The SDK also exports the shared helpers and protocol metadata that were previously split into standalone packages:
+
+- `formatAddress(address)`
+- `validateStacksAddress(address)`
+- `initializeProtocol(options?)`
+- `getProtocolConfig()`
+- `createStacksAddress(address, network?)`
+
 ## Development
 
 ```bash
