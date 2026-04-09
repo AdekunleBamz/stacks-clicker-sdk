@@ -44,12 +44,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AdekunleBamz/stacks-clicker-sdk.git"
+    "url": "git+https://github.com/AdekunleBamz/stacks-clicker.git"
   },
   "bugs": {
-    "url": "https://github.com/AdekunleBamz/stacks-clicker-sdk/issues"
+    "url": "https://github.com/AdekunleBamz/stacks-clicker/issues"
   },
-  "homepage": "https://github.com/AdekunleBamz/stacks-clicker-sdk#readme",
+  "homepage": "https://github.com/AdekunleBamz/stacks-clicker#readme",
   "publishConfig": {
     "access": "public"
   },
